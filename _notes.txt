@@ -1,0 +1,12 @@
+Working out:
+
+Make a string from hold.txt (for example), just get a certain subtitle with body
+1. Take Hold.txt
+2. Seperate days with bodys to string
+3. Seperate main titles with bodys from days to string
+7. Seperate sub titles with bodys from main titles into one string
+
+Using DayMan:
+1. Take Hold.txt
+2. Sort out days for DayMan class
+3. 
