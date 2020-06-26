@@ -1,5 +1,8 @@
 module jmisc;
 
-public import jmisc.base;
-public import jmisc.dayman, jmisc.day;
-public import jmisc.wildcard;
+public:
+import jmisc.base;
+import jmisc.dayman, jmisc.day;
+import jmisc.wildcard;
+import jmisc.trig;
+import jmisc.protime;

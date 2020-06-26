@@ -2,13 +2,53 @@
 //#not sure about avoiding having a gap if there's no args
 module jmisc.base;
 
-bool g_checkPoints = true;
 
-version = CanIncludeUnittests;
+//version = CanIncludeUnittests;
 
 version = Mine;
 
 import std.traits;
+
+bool g_checkPoints = true;
+
+// see small/backups.d and folder small/BackUpSaves
+void backUp(in string startFileName) {
+	import std.file: exists;
+	import std.path: buildPath, stripExtension; //, getExtension;
+	import std.conv: to;
+	import std.string: format, lastIndexOf;
+
+	int id;
+	immutable totalNFSaves = 10;
+	string makeFn(in int sp) {
+		return buildPath("BackUpSaves",
+					format("%s_%02d%s",
+						startFileName.stripExtension,
+						sp,
+						//startFileName.getExtension));
+						startFileName[startFileName.lastIndexOf(".") .. $]));
+	}
+	int antifreeze = totalNFSaves;
+	string backUpFileName;
+	do {
+		backUpFileName = makeFn(id);
+		id += 1;
+		antifreeze -= 1;
+	} while(exists(backUpFileName) && antifreeze > -1);
+	if (antifreeze == -1) {
+		writeln("Notice: infinite loop detected - extra save (", backUpFileName, ")");
+	}
+	import std.file : copy, remove, exists;
+	copy(startFileName, backUpFileName);
+	string fn;
+	if (id < totalNFSaves)
+		fn = makeFn(id);
+	else
+		fn = makeFn(0);
+	if (fn.exists)
+		remove(fn);
+	writeln("Copied '", startFileName, "' to '", backUpFileName, "'");
+}
 
 string addCommas(T)(in T num) {
 	version(Mine) {
@@ -50,12 +90,12 @@ string addCommas(T)(in T num) {
 	}
 }
 
+@("Printed Numbers test")
 unittest {
 	writeln("One million: ", addCommas(1_000_000));
-	writen("Negative a thousand: ", addCommas(1_000));
+	writeln("Negative a thousand: ", addCommas(-1_000));
 	writeln("One million and one millionth: ", addCommas(1_000_000.000_000_1));
 }
-
 
 auto getNotesSortDays(in string txt) {
 	import jmisc.dayman, jmisc.day;
@@ -136,11 +176,36 @@ auto dateTimeString() {
 		return format(
 			"%s " ~ // day of the week (eg. 'Saturday')
 			"%s %s %s " ~ // day, month, year
-			"[%s%s:%02s:%02s%s]", // hour:minute:second am/pm //#thinking of having a space if the time is 1-9
+			"%s",
+//			"[%s%s:%02s:%02s%s]", // hour:minute:second am/pm //#thinking of having a space if the time is 1-9
 			"Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split[dayOfWeek],
 			day, "Zeroth January February March April May June July August September October November December".
 					split[cast(int)month], year,
-			(hour == 0 || hour == 22 && hour == 23 || (hour >= 10 && hour <= 12) ? "" : " "), (hour == 0 || hour == 12 ? 12 : hour % 12), minute, second, (hour <= 11 ? "am" : "pm"));
+			timeString);
+//			(hour == 0 || hour == 22 || hour == 23 || (hour >= 10 && hour <= 12) ? "" : " "),
+//			(hour == 0 || hour == 12 ? 12 : hour % 12), minute, second, (hour <= 11 ? "am" : "pm"));
+	}
+}
+
+string timeString() {
+	import std.datetime : DateTime, Clock;
+
+	auto dateTime = cast(DateTime)Clock.currTime();
+
+	return timeString(dateTime, true);
+}
+
+import std.datetime : DateTime;
+
+string timeString(DateTime time, bool includeSecond = false) {
+	import std.string : format;
+	import std.datetime : DateTime, Clock;
+
+//	auto dateNTime = cast(DateTime)Clock.currTime();
+	with(time) {
+		return format("[%s%s:%02s:%02s%s]",
+			(hour == 0 || hour == 22 || hour == 23 || (hour >= 10 && hour <= 12) ? "" : " "),
+				(hour == 0 || hour == 12 ? 12 : hour % 12), minute, second, (hour <= 11 ? "am" : "pm"));
 	}
 }
 
@@ -150,7 +215,7 @@ void numCycle(T)(ref T num, size_t max, T start = 0)
 	if (isNumeric!T) 
 {
 	num += 1;
-	if (num == max)
+	if (num == max + 1)
 		num = start;
 }
 
@@ -171,29 +236,32 @@ import std.stdio : writeln;
 // g and h beside each other (and in the middle) on the keyboard
 /// Got Here!
 void gh(string message = "Got here!", string fileStr = __FILE__, string functionStr = __FUNCTION__, size_t lineNum = __LINE__) {
-	writeln("File: ", fileStr, ", Funciton: ", functionStr, ", (", lineNum, "), Message: ", message);
+	if (g_checkPoints)
+		writeln("File: ", fileStr, ", Function: ", functionStr, ", (", lineNum, "), Message: ", message);
 }
 
 //#debug = 3;
 void gh(int num, string message = "", string fileStr = __FILE__, string functionStr = __FUNCTION__,
 	size_t lineNum = __LINE__) {
 	if (g_checkPoints)
-		writeln("Got here, point (", num, "), File: ", fileStr, ", Funciton: ", functionStr, ", (", lineNum, ")",
+		writeln("Got here, point (", num, "), File: ", fileStr, ", Function: ", functionStr, ", (", lineNum, ")",
 			(message != "" ? ", Message: " : ""), message);
 }
 
 /++
-	Joel view for displaying range items
+	Joel view for making a list string
 +/
 auto jview(R)(R range, in string message = "", in string bullet = ". ") {
+	string result;
+
 	import std.stdio : writeln;
 	import std.range : enumerate;
 
-	writeln(message);	
+	result = message ~ '\n';
 	foreach(i, e; range.enumerate)
-		writeln(i, bullet, e);
+		result ~= text(i, bullet, e) ~ '\n';
 	
-	return range;
+	return result;
 }
 
 /// Save writing the symbol twice each time
@@ -205,11 +273,9 @@ auto jview(R)(R range, in string message = "", in string bullet = ". ") {
 /// day: 30
 /// ---
 string traceList(in string[] strs...) {
-	import std.stdio : writeln;
-
 	string result;
 	foreach( str; strs )
-		result ~= `writeln( "` ~ str ~ `: ", ` ~ str ~ ` );` ~ "\n";
+		result ~= `import sgd.stdio : writeln; writeln( "` ~ str ~ `: ", ` ~ str ~ ` );` ~ "\n";
 
 	return result;
 }
@@ -226,12 +292,10 @@ string traceList(in string[] strs...) {
  * (a: 1) (b: 0.2) (c: three)
  */
 string trace(in string[] strs...) {
-	import std.stdio : writef, writeln;
-
 	string result;
 
 	foreach( str; strs ) {
-		result ~= `import std.stdio : writef; writef( "(` ~ str ~ `: %s) ", ` ~ str ~ ` );`;
+		result ~= `import std.stdio : writef, writeln; writef( "(` ~ str ~ `: %s) ", ` ~ str ~ ` );`;
 	}
 	result ~= `writeln();`;
 

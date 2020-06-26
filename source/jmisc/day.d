@@ -118,8 +118,9 @@ struct Day {
 		return result;
 	}
 
+	@("From title")
 	unittest {
-		auto day = Day(`11 2 2018 \#/
+				auto day = Day(`11 2 2018 \#/
 		
 Test \/
 
@@ -144,6 +145,24 @@ Sub body
 
 
 `);
+	}
+
+	@("From title 2")
+	unittest {
+				auto day = Day(`11 2 2018 \#/
+		
+Test \/
+
+This is a test
+
+Test Sub \/b
+
+Sub body
+
+
+Test2 \/
+
+This is a test as well!`);
 
 		assert(day.getNotesFromTitle(`Test2 \/`) == `Test2 \/
 
@@ -151,6 +170,7 @@ This is a test as well!
 
 
 `);
+	}
 
 /+
 		auto notesFromTitle = day.getNotesFromTitle(`Test \/`);
@@ -161,5 +181,4 @@ Sub body
 
 `);
 +/
-	}
 }
