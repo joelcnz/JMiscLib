@@ -255,6 +255,7 @@ auto jview(R)(R range, in string message = "", in string bullet = ". ") {
 	string result;
 
 	import std.stdio : writeln;
+	import std.conv : text;
 	import std.range : enumerate;
 
 	result = message ~ '\n';
