@@ -11,6 +11,16 @@ import std.traits;
 
 bool g_checkPoints = true;
 
+/+
+auto jsort(in string folder, in string ffilter) {
+	import std.file : dirEntries, SpanMode;
+	import std.range : enumerate, array;
+	import std.algorithm : sort;
+
+	return dirEntries(folder, ffilter, SpanMode.shallow).array.sort!"a < b".enumerate(0);
+}
++/
+
 // see small/backups.d and folder small/BackUpSaves
 void backUp(in string startFileName) {
 	import std.file: exists;
