@@ -1,5 +1,9 @@
 module jmisc.trig;
 
+version(safe) {
+@safe:
+}
+
 import jmisc.base;
 
 import std.math;
@@ -152,6 +156,7 @@ void Cov2( double ox, double oy, double ang, double *cx, double *cy ) {
   dy=sin(ang);
 }
 
+/+
 /// Aim and move x and y
 void aMove( double* mx,double* my, double stp, double ang ) {
   (*mx)+=stp*cos(ang);
@@ -168,6 +173,7 @@ void aMovex( double *mx, double stp, double ang ) {
 void aMovey( double *my, double stp, double ang ) {
   (*my)+=stp*sin(ang);
 }
++/
 
 /// Get distance template
 auto distance(T)(PointVec!(2, T) a, PointVec!(2, T) b) {

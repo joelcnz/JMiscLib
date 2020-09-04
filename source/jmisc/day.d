@@ -2,6 +2,12 @@
 //# || if just white space
 module jmisc.day;
 
+version(safe) {
+@safe:
+}
+
+@trusted:
+
 /// Notes day
 struct Day {
 	/// Which day

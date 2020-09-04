@@ -2,6 +2,19 @@
 //#not sure about avoiding having a gap if there's no args
 module jmisc.base;
 
+/+
+this version thing not working
+File: dub.json
+Snippit:
+"dflags": [
+		"-version=safe"
+	])
++/
+version(safe) {
+@safe:
+}
+
+@trusted:
 
 //version = CanIncludeUnittests;
 
@@ -20,6 +33,17 @@ auto jsort(in string folder, in string ffilter) {
 	return dirEntries(folder, ffilter, SpanMode.shallow).array.sort!"a < b".enumerate(0);
 }
 +/
+
+/++
+eg
+```
+//foreach(a; 0 .. 100)
+//	writeln("Speed up steady point: ", fraction(256, a));
+```
++/
+auto progressFraction(T1,T2,T3)(in T1 max, in T2 gage, in T3 progress) {
+	return (gage / max) * progress;
+}
 
 // see small/backups.d and folder small/BackUpSaves
 void backUp(in string startFileName) {
@@ -151,7 +175,7 @@ A log: Outputs to terminal, and history.txt file
 Use: use it like writeln e.g. upDateStatus(1, "two", 3.0); -> Sunday 14 January 2018 [ 7:58:34am] 1two3
 +/
 auto upDateStatus(T...)(T args) {
-    import std.stdio : write, stdout;
+    import std.stdio : writeln; //, stdout;
 	import std.conv : text;
 
 	string txtln,
@@ -160,9 +184,9 @@ auto upDateStatus(T...)(T args) {
 	//#not sure about avoiding having a gap if there's no args
 	if (ustxt != "")
 		txtln ~= " " ~ ustxt;
-	txtln ~= "\n";
-	write(txtln);
-	stdout.flush;
+	//txtln ~= "\n";
+	writeln(txtln);
+	//stdout.flush;
 
 	import std.file : append;
 	append("history.txt", txtln);
@@ -261,7 +285,7 @@ void gh(int num, string message = "", string fileStr = __FILE__, string function
 /++
 	Joel view for making a list string
 +/
-auto jview(R)(R range, in string message = "", in string bullet = ". ") {
+auto jview(R)(R range, in string message = "", in string bullet = ". ", in string end = "\n") {
 	string result;
 
 	import std.stdio : writeln;
@@ -270,7 +294,7 @@ auto jview(R)(R range, in string message = "", in string bullet = ". ") {
 
 	result = message ~ '\n';
 	foreach(i, e; range.enumerate)
-		result ~= text(i, bullet, e) ~ '\n';
+		result ~= text(i, bullet, e) ~ end;
 	
 	return result;
 }
@@ -333,9 +357,8 @@ template trace(alias var)
 {
 	void trace(string file = __FILE__, size_t line = __LINE__)()
 	{
-		import std.stdio : stderr;
-		stderr.writeln(file, "(", line, "): ", var.stringof, ": ", var);
-		stderr.flush();
+		import std.stdio;
+		writeln(file, "(", line, "): ", var.stringof, ": ", var);
 	}
 }
 

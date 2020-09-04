@@ -1,5 +1,9 @@
 module jmisc.protime;
 
+version(safe) {
+@safe:
+}
+
 //version = feedBack;
 
 import jmisc.base;

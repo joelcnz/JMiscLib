@@ -1,5 +1,11 @@
 module jmisc.dayman;
 
+version(safe) {
+@safe:
+}
+
+@trusted:
+
 import jmisc.day;
 
 struct DayMan {

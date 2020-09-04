@@ -20,6 +20,10 @@
 */
 module jmisc.wildcard;
 
+version(safe) {
+@safe:
+}
+
 import std.stdio;
 import core.stdc.ctype;
 
