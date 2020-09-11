@@ -52,6 +52,11 @@ void backUp(in string startFileName) {
 	import std.conv: to;
 	import std.string: format, lastIndexOf;
 
+	if (! startFileName.exists) {
+		import std.stdio : writeln; writeln(startFileName, " not exist");
+		return;
+	}
+
 	int id;
 	immutable totalNFSaves = 10;
 	string makeFn(in int sp) {
