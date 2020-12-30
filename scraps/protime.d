@@ -124,7 +124,7 @@ Read Heb 13 1 - 25 [_] [11:36am] -> [11:42am]
 					tm = 0;
 				}
 				num += tm;
-				writefln("Total: %s, current: %s", num, tm);
+				writefln!"Total: %s, current: %s"(num, tm);
 			}
 		}
 
@@ -134,7 +134,7 @@ Read Heb 13 1 - 25 [_] [11:36am] -> [11:42am]
 	trace!result;
 	if (! result.length) {
 		import std.string : format;
-		result = format("Total time: %02d:%02d (%d days)", num / 60, num % 60, (num / 60) / 24);
+		result = format!"Total time: %02d:%02d (%d days)"(num / 60, num % 60, (num / 60) / 24);
 	}
 
 	return result;

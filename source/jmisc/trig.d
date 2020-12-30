@@ -8,6 +8,8 @@ import jmisc.base;
 
 import std.math;
 
+immutable PIE = PI;
+
 /// From point
 void fromPoint(ref float magnitude, ref float direction, float[2] point) {
     immutable x = point[0],
@@ -32,18 +34,23 @@ float[2] toPoint(in float direction, in float magnitude) {
 /// aim is the same as getAngle
 alias aim = getAngle;
 
+void PointXYDir(ref float xdir, ref float ydir,float xpos,float ypos,float xtarg,float ytarg, float spd) {
+  xyaim(xdir,ydir, aim(xpos,ypos,xtarg,ytarg));
+  xdir *= spd;
+  ydir *= spd;
+}
 /*
-void Project( double old_x, double old_y, double angle, double* new_x, double* new_y )
+void Project( float old_x, float old_y, float angle, float* new_x, float* new_y )
 {
-  double Sin = (double)sin(angle),
-      Cos = (double)cos(angle);
+  float Sin = (float)sin(angle),
+      Cos = (float)cos(angle);
   (*new_x)=( Cos*old_x - Sin*old_y ),
   (*new_y)=( Sin*old_x + Cos*old_y );
 }
 
-void ProjectXY( double old_x, double old_y, double angle, double *new_x, double *new_y ) {
-  double Sin = (double)sin(angle),
-      Cos = (double)cos(angle);
+void ProjectXY( float old_x, float old_y, float angle, float *new_x, float *new_y ) {
+  float Sin = (float)sin(angle),
+      Cos = (float)cos(angle);
   (*new_x)+=( Cos*old_x - Sin*old_y ),
   (*new_y)+=( Sin*old_x + Cos*old_y );
 }
@@ -64,35 +71,34 @@ ProjectXY( x,y, angle, &x,&y );
 #endif
 */
 
-/*
 // 2
-int inScope( double a, double ta, double scope ) {
-//  double ata=correct( a-(ta-(scope/2)) );
+bool inScope( float a, float ta, float sc ) {
+//  float ata=correct( a-(ta-(scope/2)) );
 
-  return ( correct( a-ta+scope/2 )<=scope ? 1 : 0);
+  return correct( a-ta+sc/2 )<=sc;
 //  ( ata<=scope ? 1 : 0);
 }
 
-int isRight( double a, double ta, double scope ) {
-  if ( inScope( a, ta, scope ) && correct( a-ta )!=PIE )
+int getDirection( float a, float ta, float sc ) {
+  if ( inScope( a, ta, sc ) && correct( a-ta )!=PIE )
    return
-     ( correct( a-ta )< PIE ? -1 : 1 );
+     correct( a-ta )< PIE ? -1 : 1;
   else
    return 0;
 }
-*/
-//double abs( double v ) { return v<0 ? v*-1 : v; }
+
+//float abs( float v ) { return v<0 ? v*-1 : v; }
 
 // 4
 /// Quick distance
-double quickDistance( double x,double y, double tx,double ty )
+float quickDistance( float x,float y, float tx,float ty )
 {
   return abs( x - tx ) + abs( y - ty );
 }
 
 // 7m
 /// Keep within PI * 2
-@safe double correct( double angle ) {
+@safe float correct( float angle ) {
   immutable a=
 //         2*PIE
           PI*2
@@ -107,36 +113,36 @@ double quickDistance( double x,double y, double tx,double ty )
 }
 
 // 8
-bool inrange( double x,double y, double tx,double ty, double range ) {
+bool inrange( float x,float y, float tx,float ty, float range ) {
   return distance( x,y, tx,ty ) <= range;
 }
 
 /*
-void Conv( double x, double y, double ox, double oy, double ang, int *nx, int *ny ) {
+void Conv( float x, float y, float ox, float oy, float ang, int *nx, int *ny ) {
   int cx,cy;
   Cov( ox,oy, ang, &cx,&cy );
   (*nx)=(int)(x + cx);
   (*ny)=(int)(y + cy);
 }
 
-void Cov( double ox, double oy, double ang, int *cx, int *cy ) {
-  double sn = sin(ang),
+void Cov( float ox, float oy, float ang, int *cx, int *cy ) {
+  float sn = sin(ang),
       cs = cos(ang);
   (*cx)=(int)( cs*ox - sn*oy ),
   (*cy)=(int)( sn*ox + cs*oy );
 }
 
-void Conv2( double x, double y, double ox, double oy, double ang,
-            double *nx, double *ny ) {
-  double cx,cy;
+void Conv2( float x, float y, float ox, float oy, float ang,
+            float *nx, float *ny ) {
+  float cx,cy;
   Cov2( ox,oy, ang, &cx,&cy );
   (*nx)=x + cx;
   (*ny)=y + cy;
 }
 
-void Cov2( double ox, double oy, double ang, double *cx, double *cy ) {
-  double sn = (double)sin(ang),
-      cs = (double)cos(ang);
+void Cov2( float ox, float oy, float ang, float *cx, float *cy ) {
+  float sn = (float)sin(ang),
+      cs = (float)cos(ang);
   (*cx)=( cs*ox - sn*oy ),
   (*cy)=( sn*ox + cs*oy );
 
@@ -158,19 +164,19 @@ void Cov2( double ox, double oy, double ang, double *cx, double *cy ) {
 
 /+
 /// Aim and move x and y
-void aMove( double* mx,double* my, double stp, double ang ) {
+void aMove( float* mx,float* my, float stp, float ang ) {
   (*mx)+=stp*cos(ang);
   (*my)+=stp*sin(ang);
 }
 
 
 /// Aim and move just x
-void aMovex( double *mx, double stp, double ang ) {
+void aMovex( float *mx, float stp, float ang ) {
   (*mx)+=stp*cos(ang);
 }
 
 /// Aim and move just y
-void aMovey( double *my, double stp, double ang ) {
+void aMovey( float *my, float stp, float ang ) {
   (*my)+=stp*sin(ang);
 }
 +/

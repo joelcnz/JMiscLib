@@ -94,7 +94,7 @@ struct JTime {
             version(feedBack)
                 mixin(trace("mHour mMinute".split));
         } // else
-    }
+    } // this
 
     int getTime() {
         immutable minutes = mHour * 60 + mMinute;
@@ -180,7 +180,7 @@ Read Heb 13 1 - 25 [_] [11:36am] -> [11:42am]
 				}
 				num += tm;
                 version(feedBack)
-                    writefln("Total: %s, current: %s", num, tm);
+                    writefln!"Total: %s, current: %s"(num, tm);
 			}
 		}
 
@@ -206,10 +206,10 @@ Read Heb 13 1 - 25 [_] [11:36am] -> [11:42am]
             writeln("In ", __FUNCTION__);
             mixin(trace("h m d".split));
         }
-		result = format("Total time: %02d:%02d (%d days)", h,m,d);
+		result = format!"Total time: %02d:%02d (%d days)"(h,m,d);
         version(feedBack)
             trace!result;
 	}
 
 	return result;
-}
+} // JTime

@@ -1,4 +1,6 @@
-//#?
+//#redundant (add commas)
+//#new
+//#new 2
 //#not sure about avoiding having a gap if there's no args
 module jmisc.base;
 
@@ -24,6 +26,66 @@ import std.traits;
 
 bool g_checkPoints = true;
 
+string jm_jumbleWord(in string orgWord) {
+	import std.stdio;
+	import std.array;
+	import std.random;
+	import std.range;
+	import std.ascii;
+
+	if (orgWord.length<4)
+		return orgWord;
+	char[] word = orgWord.dup;
+	int end;
+	bool valid=false;
+	foreach(pos;iota(cast(int)(word.length-1),0,-1))
+		if (isAlpha(word[pos])) {
+			// eg. end---v (3)
+			//        house
+			end=pos-1;
+			valid=true;
+			break;
+		}
+	if (! valid)
+		return orgWord;
+	do {
+		foreach(i;1..end) {
+			//auto tmp=word[i];
+			int j=i;
+			while(i==j)
+				j=uniform!"[]"(1,end); // end inclusive
+			import std.algorithm : swap;
+			swap(word[i], word[j]);
+			//word[i]=word[j];
+			//word[j]=tmp;
+		}
+	} while( word == orgWord );
+
+	return word.idup;
+}
+
+string[] jm_searchCollect(in string needle, in string haystack) {
+	import std.string : split;
+	import std.algorithm : canFind, filter;
+	import std.range : array;
+
+//	string[] result;
+	/+
+	foreach(line; haystack.split("\n")) {
+		if (line.canFind(needle))
+			result ~= line;
+	}
+	+/
+
+	return haystack.
+		split("\n").
+		filter!(line => line.canFind(needle)).
+		array;
+//		each!(line => line.canFind(needle) ? result ~= line});
+
+//	return result;
+}
+
 /+
 auto jsort(in string folder, in string ffilter) {
 	import std.file : dirEntries, SpanMode;
@@ -37,23 +99,32 @@ auto jsort(in string folder, in string ffilter) {
 /++
 eg
 ```
-//foreach(a; 0 .. 100)
-//	writeln("Speed up steady point: ", fraction(256, a));
+foreach(a; 0 .. 100)
+	writeln("Speed up steady point: ", processFraction(256, 100, a));
 ```
 +/
-auto progressFraction(T1,T2,T3)(in T1 max, in T2 gage, in T3 progress) {
+deprecated alias progressFraction = jm_progressFraction;
+
+auto jm_progressFraction(T1,T2,T3)(in T1 max, in T2 gage, in T3 progress) {
 	return (gage / max) * progress;
 }
 
-// see small/backups.d and folder small/BackUpSaves
-void backUp(in string startFileName) {
+//deprecated alias backUp = jm_backUp;
+// see small/backupstesting.d and folder small/BackUpSaves
+//deprecated void backUp(in string startFileName) {
+//	jm_backUp(startFileName);
+//}
+
+deprecated alias backUp = jm_backUp;
+
+void jm_backUp(in string startFileName) {
 	import std.file: exists;
-	import std.path: buildPath, stripExtension; //, getExtension;
+	import std.path: buildPath, stripExtension, baseName;
 	import std.conv: to;
 	import std.string: format, lastIndexOf;
 
 	if (! startFileName.exists) {
-		import std.stdio : writeln; writeln(startFileName, " not exist");
+		writeln(startFileName, " not exist - not backing up");
 		return;
 	}
 
@@ -61,11 +132,10 @@ void backUp(in string startFileName) {
 	immutable totalNFSaves = 10;
 	string makeFn(in int sp) {
 		return buildPath("BackUpSaves",
-					format("%s_%02d%s",
-						startFileName.stripExtension,
+					format!"%s_%02d%s"
+						(startFileName.stripExtension.baseName,
 						sp,
-						//startFileName.getExtension));
-						startFileName[startFileName.lastIndexOf(".") .. $]));
+						startFileName[startFileName.lastIndexOf(".") .. $].baseName));
 	}
 	int antifreeze = totalNFSaves;
 	string backUpFileName;
@@ -78,7 +148,10 @@ void backUp(in string startFileName) {
 		writeln("Notice: infinite loop detected - extra save (", backUpFileName, ")");
 	}
 	import std.file : copy, remove, exists;
-	copy(startFileName, backUpFileName);
+	if (startFileName.exists)
+		copy(startFileName, backUpFileName);
+	else
+		writeln(startFileName, " not exist, so not copied");
 	string fn;
 	if (id < totalNFSaves)
 		fn = makeFn(id);
@@ -89,6 +162,7 @@ void backUp(in string startFileName) {
 	writeln("Copied '", startFileName, "' to '", backUpFileName, "'");
 }
 
+//#redundant (add commas)
 string addCommas(T)(in T num) {
 	version(Mine) {
 		import std.range : retro;
@@ -179,7 +253,9 @@ auto getNotesSortFromTitleAndSubTitle(in string title, in string subTitle, in st
 A log: Outputs to terminal, and history.txt file
 Use: use it like writeln e.g. upDateStatus(1, "two", 3.0); -> Sunday 14 January 2018 [ 7:58:34am] 1two3
 +/
-auto upDateStatus(T...)(T args) {
+deprecated alias upDateStatus = jm_upDateStatus;
+
+auto jm_upDateStatus(T...)(T args) {
     import std.stdio : writeln; //, stdout;
 	import std.conv : text;
 
@@ -189,18 +265,29 @@ auto upDateStatus(T...)(T args) {
 	//#not sure about avoiding having a gap if there's no args
 	if (ustxt != "")
 		txtln ~= " " ~ ustxt;
-	//txtln ~= "\n";
-	writeln(txtln);
+	txtln ~= "\n";
+	writeln(txtln[0 .. $ - 1]);
 	//stdout.flush;
 
-	import std.file : append;
-	append("history.txt", txtln);
+	jm_addToHistory(txtln);
 	
 	return txtln;
 }
 
-void upDateStatus() {
-	"".upDateStatus;
+auto jm_addToHistory(T...)(T args) {
+	import std.conv : text;
+	import std.file : append;
+
+	auto txt = text(args);
+	append("history.txt", txt);
+
+	return txt;
+}
+
+deprecated alias upDateStatus = jm_upDateStatus;
+
+void jm_upDateStatus() {
+	"".jm_upDateStatus;
 }
 
 /**
@@ -226,6 +313,10 @@ auto dateTimeString() {
 	}
 }
 
+string dateString() {
+	return "dateString to do!";
+}
+
 string timeString() {
 	import std.datetime : DateTime, Clock;
 
@@ -242,14 +333,15 @@ string timeString(DateTime time, bool includeSecond = false) {
 
 //	auto dateNTime = cast(DateTime)Clock.currTime();
 	with(time) {
-		return format("[%s%s:%02s:%02s%s]",
-			(hour == 0 || hour == 22 || hour == 23 || (hour >= 10 && hour <= 12) ? "" : " "),
+		return format!"[%s%s:%02s:%02s%s]"
+			((hour == 0 || hour == 22 || hour == 23 || (hour >= 10 && hour <= 12) ? "" : " "),
 				(hour == 0 || hour == 12 ? 12 : hour % 12), minute, second, (hour <= 11 ? "am" : "pm"));
 	}
 }
 
 import std.traits;
 
+// 0 .. 100 numCycle(a, 100, 0);
 void numCycle(T)(ref T num, size_t max, T start = 0) 
 	if (isNumeric!T) 
 {
@@ -331,7 +423,11 @@ string traceList(in string[] strs...) {
  * 
  * (a: 1) (b: 0.2) (c: three)
  */
-string trace(in string[] strs...) {
+deprecated string trace(in string[] strs...) {
+	return tce(strs);
+}
+
+string tce(in string[] strs...) {
 	string result;
 
 	foreach( str; strs ) {
@@ -421,6 +517,23 @@ public:
 		assert(v0.length == D);
 		v[] = v0[];
 	}
+
+	//#new
+    bool opEquals(Pt a, Pt b) {
+        if (a is b)
+            return true;
+
+        return a.X == b.X && a.Y == b.Y;
+    }
+
+	//#new 2
+    bool opEquals(Pt rhs) @safe nothrow 
+    {
+        if (this is rhs)
+            return true;
+
+        return this.X == rhs.X && this.Y == rhs.Y;
+    }
 	
 	/// eg. p1 = p2;
 	auto opAssign(in Pt o) {
@@ -508,10 +621,9 @@ public:
 	
 	string toString() {
 		import std.conv;
-		return text(v);
+		return text(T.stringof, " ",v);
 	}
 
-	// ingredients //#?
 	version(CanIncludeUnittests)
 	unittest {
 		import std.stdio : writeln;
