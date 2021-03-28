@@ -274,6 +274,12 @@ auto jm_upDateStatus(T...)(T args) {
 	return txtln;
 }
 
+deprecated alias upDateStatus = jm_upDateStatus;
+
+void jm_upDateStatus() {
+	"".jm_upDateStatus;
+}
+
 auto jm_addToHistory(T...)(T args) {
 	import std.conv : text;
 	import std.file : append;
@@ -284,37 +290,11 @@ auto jm_addToHistory(T...)(T args) {
 	return txt;
 }
 
-deprecated alias upDateStatus = jm_upDateStatus;
-
-void jm_upDateStatus() {
-	"".jm_upDateStatus;
-}
-
 /**
 Prints date and time
 */
 auto dateTimeString() {
-	import std.string : format, split;
-	import std.datetime : DateTime, Clock;
-	
-	auto dateNTime = cast(DateTime)Clock.currTime();
-	with(dateNTime) {
-		return format(
-			"%s " ~ // day of the week (eg. 'Saturday')
-			"%s %s %s " ~ // day, month, year
-			"%s",
-//			"[%s%s:%02s:%02s%s]", // hour:minute:second am/pm //#thinking of having a space if the time is 1-9
-			"Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split[dayOfWeek],
-			day, "Zeroth January February March April May June July August September October November December".
-					split[cast(int)month], year,
-			timeString);
-//			(hour == 0 || hour == 22 || hour == 23 || (hour >= 10 && hour <= 12) ? "" : " "),
-//			(hour == 0 || hour == 12 ? 12 : hour % 12), minute, second, (hour <= 11 ? "am" : "pm"));
-	}
-}
-
-string dateString() {
-	return "dateString to do!";
+	return dateString() ~ " " ~ timeString();
 }
 
 string timeString() {
@@ -323,6 +303,19 @@ string timeString() {
 	auto dateTime = cast(DateTime)Clock.currTime();
 
 	return timeString(dateTime, true);
+}
+
+string dateString() {
+	import std.string : format, split;
+	import std.datetime : DateTime, Clock;
+	
+	auto dateNTime = cast(DateTime)Clock.currTime();
+	with(dateNTime) {
+		auto weekDay = "Sunday Monday Tuesday Wednesday Thursday Friday Saturday".split[dayOfWeek];
+		auto monthString = "Zeroth January February March April May June July August September October November December".
+						split[cast(int)month];
+		return format!"%s %s %s %s"(weekDay, day, monthString, year);
+	}
 }
 
 import std.datetime : DateTime;
@@ -390,16 +383,19 @@ auto jview(R)(R range, in string message = "", in string bullet = ". ", in strin
 	import std.range : enumerate;
 
 	result = message ~ '\n';
-	foreach(i, e; range.enumerate)
+	foreach(i, e; range.enumerate(1))
 		result ~= text(i, bullet, e) ~ end;
 	
+//	result = message ~ '\n';
+//	result ~= map!((i,e) => result ~= text(i, bullet, e) ~ end).array;
+
 	return result;
 }
 
 /// Save writing the symbol twice each time
 /// ---
 /// int year = 1979, day = 30;
-/// mixin( trace( "year", "day" ) );
+/// mixin( traceList( "year day".split ) );
 /// Output:
 /// year: 1979
 /// day: 30
@@ -407,7 +403,7 @@ auto jview(R)(R range, in string message = "", in string bullet = ". ", in strin
 string traceList(in string[] strs...) {
 	string result;
 	foreach( str; strs )
-		result ~= `import sgd.stdio : writeln; writeln( "` ~ str ~ `: ", ` ~ str ~ ` );` ~ "\n";
+		result ~= `import std.stdio : writeln; writeln( "` ~ str ~ `: ", ` ~ str ~ ` );` ~ "\n";
 
 	return result;
 }
